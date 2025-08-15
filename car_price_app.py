@@ -6,18 +6,26 @@ import io
 import os
 
 # ====== MODEL CONFIG ======
-# Use relative path to the model folder
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "car_price_predictor", "best_price_classifier_xgb_10bins.joblib")
 
-# ====== Load Model ======
+# ====== Load Model Function (no widgets inside) ======
 @st.cache_resource
 def load_model(path):
-    if not os.path.exists(path):
-        st.error(f"Model file not found at:\n{path}")
-        st.stop()
-    return joblib.load(path)
+    if os.path.exists(path):
+        return joblib.load(path)
+    return None  # Return None if model not found
 
 model = load_model(MODEL_PATH)
+
+# ====== If model not found, allow upload ======
+if model is None:
+    st.warning(f"Model file not found at:\n{MODEL_PATH}")
+    uploaded_file = st.file_uploader("Upload your trained model (.joblib)", type=["joblib"])
+    if uploaded_file is not None:
+        with open(MODEL_PATH, "wb") as f:
+            f.write(uploaded_file.getbuffer())
+        st.success(f"Model uploaded successfully! Saved at:\n{MODEL_PATH}\nPlease rerun the app.")
+    st.stop()  # Stop further execution until model is available
 
 # ====== Streamlit UI ======
 st.set_page_config(page_title="Car Price Prediction", page_icon="🚗", layout="centered")
@@ -74,7 +82,6 @@ if st.button("Predict Price Category"):
     pred_bin = model.predict(input_data)[0]
     pred_probs = model.predict_proba(input_data)[0]
 
-    # Weighted average
     bin_midpoints = np.array([25000, 100000, 200000, 300000, 400000, 525000, 750000, 1050000, 1500000, 2900000])
     estimated_price = np.sum(bin_midpoints * pred_probs)
 
@@ -106,4 +113,3 @@ if st.button("Predict Price Category"):
         file_name="car_price_prediction.csv",
         mime="text/csv"
     )
-
