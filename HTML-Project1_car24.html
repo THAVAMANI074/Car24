@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Car Price Prediction</title>
+</head>
+<body>
+    <h1>Car Price Prediction</h1>
+    <form method="post">
+        {% csrf_token %}
+        <label for="kilometerdriven">Kilometers Driven:</label><br />
+        <input type="number" id="kilometerdriven" name="kilometerdriven" min="0" step="any" required /><br /><br />
+
+        <label for="ownernumber">Number of Owners:</label><br />
+        <input type="number" id="ownernumber" name="ownernumber" min="0" step="any" required /><br /><br />
+
+        <label for="fueltype_num">Fuel Type:</label><br />
+        <select id="fueltype_num" name="fueltype_num" required>
+            <option value="1">Petrol</option>
+            <option value="2">Diesel</option>
+            <option value="3">CNG</option>
+        </select><br /><br />
+
+        <label for="transmission_num">Transmission Type:</label><br />
+        <select id="transmission_num" name="transmission_num" required>
+            <option value="0">Automatic</option>
+            <option value="1">Manual</option>
+        </select><br /><br />
+
+        <label for="isc24assured_num">Is C24 Assured:</label><br />
+        <select id="isc24assured_num" name="isc24assured_num" required>
+            <option value="1">Yes</option>
+            <option value="0">No</option>
+        </select><br /><br />
+
+        <label for="age">Age of Car (years):</label><br />
+        <input type="number" id="age" name="age" min="0" step="any" required /><br /><br />
+
+        <button type="submit">Predict Price</button>
+    </form>
+
+    {% if predicted_bin is not None %}
+        <h2>Prediction Results:</h2>
+        <p><strong>Predicted Price Bin:</strong> {{ predicted_bin }}</p>
+        <p><strong>Predicted Price Range:</strong> {{ predicted_range }}</p>
+        <p><strong>Estimated Price (Weighted Average):</strong> {{ estimated_price }}</p>
+        <p><strong>Prediction Probabilities:</strong></p>
+        <ul>
+            {% for prob in probabilities %}
+                <li>{{ forloop.counter0 }}: {{ prob }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if error %}
+        <p style="color:red;">Error: {{ error }}</p>
+    {% endif %}
+</body>
+</html>
